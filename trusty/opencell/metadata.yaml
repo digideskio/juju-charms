@@ -1,0 +1,12 @@
+name: opencell
+maintainer: Antoine Michéa <antoine.michea@opencellsoft.com>
+summary: Opencell Billing
+description: Opencell Billing
+tags: 
+  - app-servers
+provides:
+  website:
+    interface: http
+requires:
+  database:
+    interface: pgsql

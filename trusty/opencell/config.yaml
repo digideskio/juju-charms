@@ -1,0 +1,9 @@
+options:
+    default_username:
+        type: string
+        description: default user
+        default: "meveo.admin"
+    default_password:
+        type: string
+        description: default password
+        default: "meveo.admin"

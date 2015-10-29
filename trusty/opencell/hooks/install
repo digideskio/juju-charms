@@ -1,0 +1,70 @@
+#!/bin/bash
+set -xe
+
+juju-log "==> Install Java 7"
+apt-get -y update
+apt-get -y install software-properties-common
+add-apt-repository -y ppa:webupd8team/java
+apt-get -y update
+echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+apt-get -y install oracle-java7-installer oracle-java7-set-default
+
+
+juju-log "==> Install Preconfigured Jboss"
+JBOSS_HOME=/opt/jboss-as-7.2.0.Final
+apt-get -y install wget unzip postgresql-client pwgen
+wget -q -O jboss.zip http://opencellsoft.com/dl/jbossPgSQL.zip
+unzip -qq jboss.zip -d /opt/
+rm -f jboss.zip
+
+sed -i 's/^checkUpdate.owner=.*/checkUpdate.owner=VM-juju/' $JBOSS_HOME/standalone/configuration/meveo-admin.properties
+sed -i 's/^providers.rootDir=.*/providers.rootDir=\/opt\/jboss-as-7.2.0.Final\/meveodata/' $JBOSS_HOME/standalone/configuration/meveo-admin.properties
+
+mkdir $JBOSS_HOME/sql/
+wget -q -O $JBOSS_HOME/sql/import-postgres.sql http://opencellsoft.com/dl/current/import-postgres.sql
+wget -q -O $JBOSS_HOME/standalone/deployments/meveo.war http://opencellsoft.com/dl/current/meveo.war
+
+useradd -r opencell -d $JBOSS_HOME/
+chown opencell: -R $JBOSS_HOME/
+
+
+cat <<EOF >/etc/init.d/jboss
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          jboss
+# Required-Start:    \$local_fs \$remote_fs \$network \$syslog
+# Required-Stop:     \$local_fs \$remote_fs \$network \$syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/Stop JBoss AS 7
+### END INIT INFO
+# chkconfig: 35 92 1
+
+
+JBOSS_HOME=/opt/jboss-as-7.2.0.Final
+
+
+case "\$1" in
+    start)
+        echo "Starting JBoss AS 7 for Opencell..."
+        sudo -u opencell sh \${JBOSS_HOME}/bin/standalone.sh > /dev/null &
+    ;;
+    stop)
+        echo "Stopping JBoss AS 7 for Opencell..."
+        sudo -u opencell sh \${JBOSS_HOME}/bin/jboss-cli.sh --connect command=:shutdown
+    ;;
+    *)
+        echo "Usage: /etc/init.d/jboss {start|stop}"; exit 1;
+    ;;
+esac
+
+exit 0
+EOF
+
+chmod +x /etc/init.d/jboss
+
+update-rc.d jboss defaults
+
+juju-log "Jboss 7.2 for Opencell is installed and configured"
+
+status-set blocked "Waiting for active database connection" 
