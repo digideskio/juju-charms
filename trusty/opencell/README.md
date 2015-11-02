@@ -16,9 +16,10 @@ Trusty Juju Charm for Opencell Billing
     #deploy backend DB
     juju deploy postgresql
     #deploy Opencell
-    juju deploy cs:~opencellsoft/juju-charms/trusty/opencell
+    git clone https://github.com/opencellsoft/juju-charms.git
+    juju deploy --constraints "cpu-cores=2 mem=3G" --repository=/path_to/opencell-charm local:trusty/opencell
     #connect Opencell to the backend DB
-    juju add-relation opencell postgresql
+    juju add-relation opencell postgresql:db
     juju expose opencell
 
 # Test Opencell Charm
