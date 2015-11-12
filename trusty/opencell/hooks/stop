@@ -1,4 +1,4 @@
 #!/bin/bash
 set -xe
 
-/etc/init.d/jboss stop
+/etc/init.d/opencell-jboss stop

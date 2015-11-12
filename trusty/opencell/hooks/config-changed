@@ -1,4 +1,4 @@
 #!/bin/bash
 set -ex
 
-hooks/database-relation-changed
+$CHARM_DIR/hooks/database-relation-changed
