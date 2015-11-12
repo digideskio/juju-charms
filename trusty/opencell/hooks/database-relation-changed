@@ -13,8 +13,7 @@ fi
  
 user=`relation-get user`
 password=`relation-get password`
-host=`relation-get private-address`
-database=`relation-get database`
+host=`relation-get host`
 dbport=`relation-get port`
 JBOSS_HOME=$(config-get opencell_install_path)
 sqlfile=$JBOSS_HOME/sql/import-postgres.sql
