@@ -3,10 +3,10 @@ maintainer: Antoine Michéa <antoine.michea@opencellsoft.com>
 summary: Opencell Billing
 description: Opencell Billing
 tags: 
-  - app-servers
+  - cloudfoundry
 provides:
-  website:
-    interface: http
+  opencell:
+  	inteface: http-alt
 requires:
   database:
     interface: pgsql

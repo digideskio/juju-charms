@@ -16,7 +16,8 @@ password=`relation-get password`
 host=`relation-get private-address`
 database=`relation-get database`
 dbport=`relation-get port`
-sqlfile=/opt/jboss-as-7.2.0.Final/sql/import-postgres.sql
+JBOSS_HOME=$(config-get opencell_install_path)
+sqlfile=$JBOSS_HOME/sql/import-postgres.sql
 
 # Postgres configuration
 export PGPASSWORD=$password
@@ -27,9 +28,9 @@ juju-log "user $user password $password host $host database $database"
 
         juju-log "Configure Jboss DS"
 
-        sed -i "s/localhost:5432\/opencell_db/$host:$dbport\/$database/" /opt/jboss-as-7.2.0.Final/standalone/configuration/standalone.xml
-        sed -i "s/opencell_db_user/$user/" /opt/jboss-as-7.2.0.Final/standalone/configuration/standalone.xml
-        sed -i "s/opencell_db_password/$password/" /opt/jboss-as-7.2.0.Final/standalone/configuration/standalone.xml
+        sed -i "s/<connection-url>.*<\/connection-url>/<connection-url>$host:$dbport\/$database<\/connection-url>/" $JBOSS_HOME/standalone/configuration/standalone.xml
+        sed -i "s/<user-name>.*<\/user-name>/<user-name>$user<\/user-name>$user/" $JBOSS_HOME/standalone/configuration/standalone.xml
+        sed -i "s/<password>.*<\/password>/<password>$password<\/password>/" $JBOSS_HOME/standalone/configuration/standalone.xml
 
         juju-log "Database connexion to Jboss is configured"
 
@@ -47,7 +48,7 @@ else
 
 
 #user='opencell'
-#password=`pwgen -s -y -1 14 1`
+#password=`pwgen -s -c -1 14 1`
 #database="opencell"
 
 	#psql --dbname=$database --username=$user --host=$host -c "CREATE USER opencell WITH SUPERUSER PASSWORD '$password';"

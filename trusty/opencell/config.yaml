@@ -1,9 +1,17 @@
 options:
+    opencell_version:
+        type: string
+        description: Deployed version of opencell
+        default: current
+	opencell_install_path:
+		type: string
+		description: the path where opencell pre-configured jboss is copied
+		default: /opt/opencell
     default_username:
         type: string
         description: default user
-        default: "meveo.admin"
+        default: meveo.admin
     default_password:
         type: string
         description: default password
-        default: "meveo.admin"
+        default: meveo.admin

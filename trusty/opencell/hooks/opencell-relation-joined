@@ -1,0 +1,4 @@
+#!/bin/bash
+set -xe
+
+relation-set hostname=`unit-get private-address` port=8080
