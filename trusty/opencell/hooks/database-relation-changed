@@ -28,8 +28,8 @@ juju-log "user $user password $password host $host database $database"
 
         juju-log "Configure Jboss DS"
 
-        sed -i "s/<connection-url>.*<\/connection-url>/<connection-url>$host:$dbport\/$database<\/connection-url>/" $JBOSS_HOME/standalone/configuration/standalone.xml
-        sed -i "s/<user-name>.*<\/user-name>/<user-name>$user<\/user-name>$user/" $JBOSS_HOME/standalone/configuration/standalone.xml
+        sed -i "s/<connection-url>.*<\/connection-url>/<connection-url>jdbc:postgresql://$host:$dbport\/$database<\/connection-url>/" $JBOSS_HOME/standalone/configuration/standalone.xml
+        sed -i "s/<user-name>.*<\/user-name>/<user-name>$user<\/user-name>/" $JBOSS_HOME/standalone/configuration/standalone.xml
         sed -i "s/<password>.*<\/password>/<password>$password<\/password>/" $JBOSS_HOME/standalone/configuration/standalone.xml
 
         juju-log "Database connexion to Jboss is configured"
