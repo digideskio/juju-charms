@@ -29,10 +29,10 @@ useradd -r opencell -d $JBOSS_HOME/
 chown opencell: -R $JBOSS_HOME/
 
 
-cat <<EOF >/etc/init.d/jboss
+cat <<EOF >/etc/init.d/opencell-jboss
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          jboss
+# Provides:          opencell-jboss
 # Required-Start:    \$local_fs \$remote_fs \$network \$syslog
 # Required-Stop:     \$local_fs \$remote_fs \$network \$syslog
 # Default-Start:     2 3 4 5
@@ -62,9 +62,9 @@ esac
 exit 0
 EOF
 
-chmod +x /etc/init.d/jboss
+chmod +x /etc/init.d/opencell-jboss
 
-update-rc.d jboss defaults
+update-rc.d opencell-jboss defaults
 
 juju-log "Jboss 7.2 for Opencell is installed and configured"
 
