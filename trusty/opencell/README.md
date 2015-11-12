@@ -1,6 +1,6 @@
-Trusty Juju Charm for Opencell Billing
+# Trusty Juju Charm for Opencell Billing
 
-# Deploying the charm
+## Deploying the charm
 
     #boostrap Juju environment
     juju bootstrap
@@ -11,7 +11,7 @@ Trusty Juju Charm for Opencell Billing
     #expose juju-gui for public access
     juju expose juju-gui
 
-# Deploying Opencell Charm
+## Deploying Opencell Charm
 
     #deploy backend DB
     juju deploy postgresql
@@ -22,7 +22,10 @@ Trusty Juju Charm for Opencell Billing
     juju add-relation opencell postgresql:db
     juju expose opencell
 
-# Test Opencell Charm
+## Test Opencell Charm
 
 Go to http://<public_ip>:8080 or http://<public_ip>:8080/ (username: meveo.admin, password: meveo.admin) for Admininstration
 
+## Scale out Usage
+
+Opencell does not currently support scaling out.
