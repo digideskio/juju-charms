@@ -4,9 +4,9 @@ options:
         description: Deployed version of opencell
         default: current
     opencell_install_path:
-		type: string
-		description: the path where opencell pre-configured jboss is copied
-		default: /opt/opencell
+        type: string
+        description: the path where opencell pre-configured jboss is copied
+        default: /opt/opencell
     default_username:
         type: string
         description: default user
