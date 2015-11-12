@@ -6,7 +6,7 @@ tags:
   - cloudfoundry
 provides:
   opencell:
-    inteface: http-alt
+    interface: http-alt
 requires:
   database:
     interface: pgsql
