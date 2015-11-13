@@ -1,4 +1,4 @@
 #!/bin/bash
-set -ex
+set -xe
 
-$CHARM_DIR/hooks/database-relation-changed
+juju-log "Congiguration changed"
