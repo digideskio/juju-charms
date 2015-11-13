@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -xe
 
 # Get DB details
 juju-log "Getting database connection details"
@@ -9,7 +9,7 @@ database=`relation-get database`
 if [ -z "${database}" ]; then
     juju-log "No database information sent yet. Silently exiting."
     exit 0
-f
+fi
  
 user=`relation-get user`
 password=`relation-get password`
