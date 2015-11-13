@@ -6,7 +6,7 @@ set -xe
 juju-log "Getting database connection details"
  
 database=`relation-get database`
-if [ -z "${database}" ]; then
+if [ -z "$database" ]; then
     juju-log "No database information sent yet. Silently exiting."
     exit 0
 fi
