@@ -1,0 +1,94 @@
+#!/bin/bash
+set -xe
+
+juju-log  "clearwater-ellis-relation-changed"
+apt-get -y update
+apt-get -y install curl
+
+#setting the Opencell webhooks for the relation
+host=`relation-get private-address`
+api_key=`relation-get api-client`
+ip_address=`dig +short @8.8.8.8 $host`
+authorization=`echo $(config-get default_username)':'$(config-get default_password) | base64`
+
+cat <<EOF >soap-request1.xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.api.meveo.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:createOrUpdateWebHookNotification>         
+         <notification code="UA_CREATION">
+            <classNameFilter>org.meveo.model.billing.UserAccount</classNameFilter>
+            <eventTypeFilter>CREATED</eventTypeFilter>
+            <host>$ip_address</host>           
+            <page>accounts</page>
+            <httpMethod>HTTP_POST</httpMethod>
+            <headers>
+               <entry>
+                  <key>NGV-Signup-Code</key>
+                  <value>abracadabra</value>
+               </entry>
+               <entry>
+                  <key>Content-Type</key>
+                  <value>application/x-www-form-urlencoded</value>
+               </entry>                             
+            </headers>
+            <params>
+               <entry>
+                  <key>email</key>
+                  <value>#{event.getBillingAccount().getEmail()}</value>
+               </entry>
+               <entry>
+                  <key>password</key>
+                  <value>changeMe007</value>
+               </entry>      
+               <entry>
+                  <key>full_name</key>
+                  <value>#{event.getBillingAccount().getName().getFirstName()} #{event.getBillingAccount().getName().getLastName()}</value>
+               </entry>                         
+            </params>
+         </notification>
+      </ws:createOrUpdateWebHookNotification>
+   </soapenv:Body>
+</soapenv:Envelope> 
+EOF
+
+curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization:Basic $authorization" --data @soap-request1.xml http://127.0.0.1:8080/meveo/NotificationWs
+
+
+cat <<EOF >soap-request2.xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.api.meveo.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:createOrUpdateWebHookNotification>         
+         <!--Optional:-->
+         <notification code="ACCESS_CREATION">
+            <classNameFilter>org.meveo.model.mediation.Access</classNameFilter>
+            <eventTypeFilter>CREATED</eventTypeFilter>    
+           <!--Optional:-->
+            <scriptInstanceCode>org.meveo.service.script.GetSipNumber</scriptInstanceCode>
+            <scriptParams>
+               <entry>
+                  <!--Optional:-->
+                  <key>accessId</key>
+                  <!--Optional:-->
+                  <value>#{event.getId()}</value>
+               </entry>               
+            </scriptParams>
+            <host>$ip_address</host>                   
+           <page>accounts/#{event.getSubscription().getUserAccount().getBillingAccount().getEmail()}/numbers</page>
+            <httpMethod>HTTP_POST</httpMethod>
+            <headers>
+               <entry>
+                  <key>NGV-API-Key</key>
+                  <value>$api_key</value>
+               </entry>                                           
+            </headers>
+         </notification>
+      </ws:createOrUpdateWebHookNotification>
+   </soapenv:Body>
+</soapenv:Envelope>
+EOF
+
+curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization:Basic $authorization" --data @soap-request2.xml http://127.0.0.1:8080/meveo/NotificationWs
+
+juju-log  "clearwater-ellis-relation-changed completed"
