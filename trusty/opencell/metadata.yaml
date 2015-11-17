@@ -10,3 +10,6 @@ provides:
 requires:
   database:
     interface: pgsql
+  clearwater-ellis:
+    interface: as-register
+    optional: true
