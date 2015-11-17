@@ -9,7 +9,7 @@ apt-get -y install curl
 host=`relation-get private-address`
 api_key=`relation-get api-client`
 ip_address=`dig +short @8.8.8.8 $host`
-authorization=`echo $(config-get default_username)':'$(config-get default_password) | base64`
+authorization=`echo -n $(config-get default_username)':'$(config-get default_password) | base64`
 
 cat <<EOF >soap-request1.xml
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.api.meveo.org/">
@@ -52,10 +52,70 @@ cat <<EOF >soap-request1.xml
 </soapenv:Envelope> 
 EOF
 
-curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization:Basic $authorization" --data @soap-request1.xml http://127.0.0.1:8080/meveo/NotificationWs
+curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization: Basic ${authorization}" --data @soap-request1.xml http://127.0.0.1:8080/meveo/NotificationWs
 
 
 cat <<EOF >soap-request2.xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.api.meveo.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:createOrUpdate>
+         <!--Optional:-->
+         <createOrUpdateScriptInstanceRequest code="org.meveo.service.script.GetSipNumber" description="Get Sip number from reponse and set it to access">
+             <type>JAVA</type>
+            <!--Optional:-->
+            <script><![CDATA[
+package org.meveo.service.script;
+
+import java.util.Map;
+
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.model.admin.User;
+import org.meveo.model.crm.Provider;
+import org.meveo.model.mediation.Access;
+import org.meveo.service.medina.impl.AccessService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.meveo.commons.utils.StringUtils;
+
+public class GetSipNumber extends org.meveo.service.script.Script {
+	
+	private static final Logger log = LoggerFactory.getLogger(GetSipNumber.class);
+		
+	public void execute(Map<String, Object> context, Provider provider,User user) throws BusinessException {
+		log.info("Execute...");
+	     String clearwaterResponse = (String)context.get("response");	
+	     log.info("clearwaterResponse:"+clearwaterResponse);
+	     String sipNumber = matchSipNumber(clearwaterResponse);
+	     log.info("sipNumber:"+sipNumber);
+	     String accessId = (String)context.get("accessId");
+	     log.info("accessId:"+accessId);
+	     AccessService accessService = (AccessService) getServiceInterface("AccessService");
+	     Access theAccess = accessService.findById(new Long(accessId));
+	     theAccess.setAccessUserId(sipNumber);
+	     accessService.update(theAccess, user);
+	     log.info("update access done");
+	}
+	
+	private String matchSipNumber(String response){	
+	    if(response == null){
+	    		return null;
+	    } 	
+		return  StringUtils.patternMacher("\"sip_uri\": \"(.*?)\",", response);
+	}
+}
+            ]]></script>
+         </createOrUpdateScriptInstanceRequest>
+      </ws:createOrUpdate>
+   </soapenv:Body>
+</soapenv:Envelope>
+EOF
+
+curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization: Basic ${authorization}" --data @soap-request2.xml http://127.0.0.1:8080/meveo/ScriptInstanceWs
+
+
+
+cat <<EOF >soap-request3.xml
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.api.meveo.org/">
    <soapenv:Header/>
    <soapenv:Body>
@@ -89,6 +149,6 @@ cat <<EOF >soap-request2.xml
 </soapenv:Envelope>
 EOF
 
-curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization:Basic $authorization" --data @soap-request2.xml http://127.0.0.1:8080/meveo/NotificationWs
+curl --header "Content-Type: text/xml;charset=UTF-8" --header "Authorization: Basic ${authorization}" --data @soap-request3.xml http://127.0.0.1:8080/meveo/NotificationWs
 
 juju-log  "clearwater-ellis-relation-changed completed"
